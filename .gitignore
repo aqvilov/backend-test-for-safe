@@ -1,0 +1,9 @@
+.idea/
+.vscode/
+*.iml
+
+password.exe
+
+.env
+
+*.log
