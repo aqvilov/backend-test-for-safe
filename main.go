@@ -33,13 +33,12 @@ type App struct {
 
 // CORS middleware
 func enableCORS(w *http.ResponseWriter, r *http.Request) bool {
-	// Разрешаем запросы с localhost:3000 (React)
 	(*w).Header().Set("Access-Control-Allow-Origin", "http://localhost:3000")
 	(*w).Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 	(*w).Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
 	(*w).Header().Set("Access-Control-Allow-Credentials", "true")
 
-	// Обрабатываем preflight OPTIONS запрос
+
 	if r.Method == "OPTIONS" {
 		(*w).WriteHeader(http.StatusOK)
 		return true
@@ -47,7 +46,7 @@ func enableCORS(w *http.ResponseWriter, r *http.Request) bool {
 	return false
 }
 
-// Initialize database
+
 func initDB() error {
 	connStr := "root:SQLpassforCon5@tcp(127.0.0.1:3306)/rustore?parseTime=true"
 	var err error
@@ -67,7 +66,6 @@ func initDB() error {
 
 // Create tables
 func createTables() error {
-	// Первая таблица - apps
 	query1 := `
 	CREATE TABLE IF NOT EXISTS apps (
 		id INT AUTO_INCREMENT PRIMARY KEY,
@@ -89,7 +87,7 @@ func createTables() error {
 		return err
 	}
 
-	// Вторая таблица - screenshots
+
 	query2 := `
 	CREATE TABLE IF NOT EXISTS screenshots (
 		id INT AUTO_INCREMENT PRIMARY KEY,
@@ -107,9 +105,9 @@ func createTables() error {
 	return nil
 }
 
-// Insert sample data
+
 func seedData() error {
-	// Check if data exists
+
 	var count int
 	err := DB.QueryRow("SELECT COUNT(*) FROM apps").Scan(&count)
 	if err != nil {
@@ -121,7 +119,6 @@ func seedData() error {
 		return nil
 	}
 
-	// Insert apps
 	apps := []struct {
 		name, developer, category, ageRating, description, iconURL, version, size, price string
 		rating                                                                           float64
@@ -163,15 +160,12 @@ func seedData() error {
 	return nil
 }
 
-// Fix screenshot paths to be unique for each app
 func fixScreenshotPaths() error {
-	// Удаляем все текущие скриншоты
 	_, err := DB.Exec("DELETE FROM screenshots")
 	if err != nil {
 		return err
 	}
 
-	// Добавляем уникальные пути для каждого приложения
 	screenshotPaths := map[int][]string{
 		1: {"/screenshots/sber_1.jpg", "/screenshots/sber_2.jpg", "/screenshots/sber_3.jpg"},
 		2: {"/screenshots/tinkoff_1.jpg", "/screenshots/tinkoff_2.jpg", "/screenshots/tinkoff_3.jpg"},
@@ -193,8 +187,6 @@ func fixScreenshotPaths() error {
 	log.Println("✅ Screenshot paths fixed in database")
 	return nil
 }
-
-// API Handlers
 func getApps(w http.ResponseWriter, r *http.Request) {
 	if enableCORS(&w, r) {
 		return
@@ -228,7 +220,6 @@ func getApps(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// Get screenshots
 		screenshotRows, err := DB.Query("SELECT image_url FROM screenshots WHERE app_id = ?", app.ID)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -447,14 +438,12 @@ func getFeaturedApps(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	// Initialize database
 	err := initDB()
 	if err != nil {
 		log.Fatal("❌ Database connection failed:", err)
 	}
 	defer DB.Close()
 
-	// Create tables and seed data
 	err = createTables()
 	if err != nil {
 		log.Fatal("❌ Table creation failed:", err)
@@ -504,3 +493,4 @@ func main() {
 
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
+
